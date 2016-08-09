@@ -1,0 +1,4 @@
+/**/CMakeLists.txt
+/**/*.org
+/tests/check_roman_calculator
+/build
