@@ -28,6 +28,12 @@ START_TEST(the_sum_of_I_and_I_is_II)
 }
 END_TEST
 
+START_TEST(the_sum_of_I_and_II_is_III)
+{
+    ck_assert_str_eq(add_roman_numerals("I", "II"), "III");
+}
+END_TEST
+
 Suite *create_drmrd_roman_calculator_suite(void)
 {
     // Create our primary testing suite.
@@ -43,6 +49,7 @@ Suite *create_drmrd_roman_calculator_suite(void)
     // Populate our core test case with our test functions.
     tcase_add_test(tc_core, add_roman_numerals_accepts_two_strings_consisting_of_symbols_IVXLCDM);
     tcase_add_test(tc_core, the_sum_of_I_and_I_is_II);
+    tcase_add_test(tc_core, the_sum_of_I_and_II_is_III);
 
     // Add the core test case to test_suite
     suite_add_tcase(test_suite, tc_core);
