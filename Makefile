@@ -43,7 +43,7 @@ build:
 tests/check_roman_calculator: $(TARGET)
 	cc tests/check_roman_calculator.c \
 	-o tests/check_roman_calculator build/libroman_calculator.a \
-	-L/usr/local/lib -lcheck
+	-L/usr/local/lib -lcheck -ldrmrd_string
 .PHONY: check
 check: tests/check_roman_calculator
 	./tests/check_roman_calculator
