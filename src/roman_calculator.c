@@ -27,8 +27,6 @@ static const char Roman_Numeral_Char[] = {
     'I', 'V', 'X', 'L', 'C', 'D', 'M'
 };
 
-static int min(int x, int y);
-
 static char *write_additively(char *roman_numeral);
 
 /**
@@ -40,9 +38,7 @@ static char *write_additively(char *roman_numeral);
  */
 char *add_roman_numerals(char *augend, char *addend)
 {
-    int cat_length;
-    char *summandI = write_additively(augend);
-    char *summandII = write_additively(addend);
+    cat_length = strlen(augend) + strlen(addend);
 
     /*
      * Although there are some minor edge cases that we're ignoring by
@@ -71,8 +67,6 @@ char *add_roman_numerals(char *augend, char *addend)
     // Trim memory block after all replacements are completed.
     result = realloc(result, (strlen(result) + 1) * sizeof(char));
 
-    free(summandI);
-    free(summandII);
     return result;
 }
 
@@ -141,8 +135,4 @@ static char *write_additively(char *roman_numeral)
     }
 
     return result;
-}
-
-static int min(int x, int y) {
-    return (x < y) ? x : y;
 }
