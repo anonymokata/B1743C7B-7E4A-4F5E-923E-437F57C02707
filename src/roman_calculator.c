@@ -38,7 +38,9 @@ static char *write_additively(char *roman_numeral);
  */
 char *add_roman_numerals(char *augend, char *addend)
 {
-    cat_length = strlen(augend) + strlen(addend);
+    char *summandI = write_additively(augend);
+    char *summandII = write_additively(addend);
+    int cat_length = strlen(summandI) + strlen(summandII);
 
     /*
      * Although there are some minor edge cases that we're ignoring by
@@ -54,8 +56,8 @@ char *add_roman_numerals(char *augend, char *addend)
     }
 
     char *result = calloc(cat_length + 1, sizeof(char));
-    strcpy(result, augend);
-    strcat(result, addend);
+    strcpy(result, summandI);
+    strcat(result, summandII);
 
     /*
      * Replace each instance of IIII with IV and each instance of
@@ -67,6 +69,8 @@ char *add_roman_numerals(char *augend, char *addend)
     // Trim memory block after all replacements are completed.
     result = realloc(result, (strlen(result) + 1) * sizeof(char));
 
+    free(summandI);
+    free(summandII);
     return result;
 }
 
