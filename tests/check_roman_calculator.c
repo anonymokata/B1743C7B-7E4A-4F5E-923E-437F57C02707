@@ -42,6 +42,33 @@ START_TEST(the_sum_of_IV_and_II_is_VI)
 }
 END_TEST
 
+START_TEST(the_sums_of_AB_with_A_and_AA_are_B_and_BA_when_A_is_less_than_B)
+{
+    char *Subtractive_Form_AB_String[] = {
+        "IV", "IX", "IL", "IC", "ID", "IM",
+              "VX", "VL", "VC", "VD", "VM",
+                    "XL", "XC", "XD", "XM",
+                          "LC", "LD", "LM",
+                                "CD", "CM",
+                                      "DM"
+    };
+    int i = 0;
+    char *AB, A[2], AA[3], BA[3], *B;
+    for (i = 0; i < 21; i++) {
+        // Store A, B, AB, and BA as strings for the comparison tests
+        AB = Subtractive_Form_AB_String[i];
+        A[0] = AA[0] = AA[1] = AB[0];
+        A[1] = AA[2] = '\0';
+        BA[0] = AB[1];
+        BA[1] = AB[0];
+        BA[2] = '\0';
+        B = AB + 1;
+        ck_assert_str_eq(add_roman_numerals(AB, A), B);
+        ck_assert_str_eq(add_roman_numerals(AB, AA), BA);
+    }
+}
+END_TEST
+
 Suite *create_drmrd_roman_calculator_suite(void)
 {
     // Create our primary testing suite.
@@ -60,6 +87,7 @@ Suite *create_drmrd_roman_calculator_suite(void)
     tcase_add_test(tc_core, the_sum_of_I_and_II_is_III);
     tcase_add_test(tc_core, the_sum_of_III_and_II_is_V);
     tcase_add_test(tc_core, the_sum_of_IV_and_II_is_VI);
+    tcase_add_test(tc_core, the_sums_of_AB_with_A_and_AA_are_B_and_BA_when_A_is_less_than_B);
 
     // Add the core test case to test_suite
     suite_add_tcase(test_suite, tc_core);

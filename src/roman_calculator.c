@@ -38,6 +38,10 @@ static char *write_additively(char *roman_numeral);
  */
 char *add_roman_numerals(char *augend, char *addend)
 {
+    /*
+     * First, remove subtractive forms in the input, assigning the
+     * results to summandI and summandII.
+     */
     char *summandI = write_additively(augend);
     char *summandII = write_additively(addend);
     int cat_length = strlen(summandI) + strlen(summandII);
@@ -55,15 +59,33 @@ char *add_roman_numerals(char *augend, char *addend)
         return NULL;
     }
 
+    /*
+     * Now we concatenate the result. Note this should fail to work
+     * whenever summandI contains a symbol of smaller value than the
+     * largest-value symbol in summandII. But presumably that's what
+     * TDD will tell us shortly, correct? :)
+     */
     char *result = calloc(cat_length + 1, sizeof(char));
     strcpy(result, summandI);
     strcat(result, summandII);
 
     /*
-     * Replace each instance of IIII with IV and each instance of
-     * IIIII with V in temp_sum.
+     * Perform "carry overs", replacing groups of smaller symbols with
+     * the next equivalent larger symbol.
      */
+    // TODO: This is ugly. Refactor.
     result = replace_substring(result, "IIIII", "V");
+    result = replace_substring(result, "VV", "X");
+    result = replace_substring(result, "XXXXXXXXXX", "C");
+    result = replace_substring(result, "XXXXX", "L");
+    result = replace_substring(result, "LL", "C");
+    result = replace_substring(result, "CCCCCCCCCC", "M");
+    result = replace_substring(result, "CCCCC", "D");
+    result = replace_substring(result, "DD", "M");
+
+    /*
+     * Insert subtractive forms into result where they're needed.
+     */
     result = replace_substring(result, "IIII", "IV");
 
     // Trim memory block after all replacements are completed.
