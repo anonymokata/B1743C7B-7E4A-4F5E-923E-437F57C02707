@@ -17,7 +17,7 @@ all: $(TARGET) $(SO_TARGET) check
 
 # The Development Build
 dev: CFLAGS=-g -Isrc -Wall -Wextra $(OPTFLAGS)
-dev: danger_zone all
+dev: all
 
 # Recipe for object files
 $(OBJECTS): build/%.o: src/%.c
@@ -31,7 +31,7 @@ $(TARGET): build $(OBJECTS)
 
 # Recipe for shared objects. Links each SO_TARGET to all objects.
 $(SO_TARGET): $(TARGET) $(OBJECTS)
-	$(CC) -shared -o $@ $(OBJECTS)
+	@$(CC) -shared -o $@ $(OBJECTS)
 
 # Create build and bin subdirectories for object/library files and
 # binaries.
@@ -41,7 +41,7 @@ build:
 
 # The Unit Tests
 tests/check_roman_calculator: $(TARGET)
-	cc tests/check_roman_calculator.c \
+	@cc tests/check_roman_calculator.c \
 	-o tests/check_roman_calculator build/libroman_calculator.a \
 	-L/usr/local/lib -lcheck -ldrmrd_string
 .PHONY: check
@@ -53,18 +53,12 @@ valgrind:
 
 # The Cleaner
 clean:
-	rm -rf build $(OBJECTS) $(TESTS)
-	rm -f tests/tests.log
-	find . -name "*.gc*" -exec rm {} \;
-	rm -rf `find . -name "*.dSYM" -print`
+	@rm -rf build $(OBJECTS) $(TESTS)
+	@rm -f tests/tests.log
+	@find . -name "*.gc*" -exec rm {} \;
+	@rm -rf `find . -name "*.dSYM" -print`
 
 # The Install
 install: all
 	install -d $(DESTDIR)/$(PREFIX)/lib/
 	install $(TARGET) $(DESTDIR)/$(PREFIX)/lib/
-
-# Reminder for uses of common but potentially unsafe function calls
-BADFUNCS='[^_.>a-zA-Z0-9](str(n?cpy|n?cat|xfrm|n?dup|str|pbrk|tok|_)|stpn?cpy|a?sn?printf|byte_)'
-danger_zone:
-	@echo "Files with potentially dangerous functions:"
-	@egrep $(BADFUNCS) $(SOURCES) || echo "(None Found)"

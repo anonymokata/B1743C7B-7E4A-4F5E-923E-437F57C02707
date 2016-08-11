@@ -55,7 +55,8 @@ START_TEST(the_sums_of_AB_with_A_and_AA_are_B_and_BA_when_A_is_less_than_B)
     int i = 0;
     char *AB, A[2], AA[3], BA[3], *B;
     for (i = 0; i < 21; i++) {
-        // Store A, B, AB, and BA as strings for the comparison tests
+        // Rather ugly code to store A, B, AB, and BA as strings for
+        // the comparison tests
         AB = Subtractive_Form_AB_String[i];
         A[0] = AA[0] = AA[1] = AB[0];
         A[1] = AA[2] = '\0';
