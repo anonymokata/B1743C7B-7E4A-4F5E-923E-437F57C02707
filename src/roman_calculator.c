@@ -22,6 +22,9 @@ enum Roman_Numeral {RN_I, RN_V, RN_X, RN_L, RN_C, RN_D, RN_M, RN_LAST};
 static const char Roman_Numeral_Char[] = {'I', 'V', 'X', 'L', 'C', 'D', 'M'};
 
 static char *write_additively(char *roman_numeral);
+static enum Roman_Numeral get_key(char symbol);
+static char *add_additive_roman_numerals(char *augend, char *addend,
+                                         size_t cat_length);
 static char *bundle_roman_symbols(char *numeral);
 
 /**
@@ -38,19 +41,16 @@ char *add_roman_numerals(char *augend, char *addend)
 
     // Concatenate summands, throwing error if they are too large
     // TODO: Might be better to return "Infinity" instead
-    int cat_length = strlen(summandI) + strlen(summandII);
+    size_t cat_length = strlen(summandI) + strlen(summandII);
 
     if (cat_length > MAX_NUMERAL_LENGTH) {
         perror("Error: Combined size of inputs exceeds MAX_NUMERAL_LENGTH.");
         return NULL;
     }
 
-    char *result = calloc(cat_length + 1, sizeof(char));
-    strcpy(result, summandI);
-    strcat(result, summandII);
-
-    // TODO: Should sort the result before moving on, so that replacement works
-    //       as expected.
+    char *result = add_additive_roman_numerals(summandI, summandII, cat_length);
+    free(summandI);
+    free(summandII);
 
     // Process "carry overs", replacing groups of the same character with one
     // value-equivalent copy of the next most significant character.
@@ -62,8 +62,6 @@ char *add_roman_numerals(char *augend, char *addend)
     // Trim memory block after all replacements are completed.
     result = realloc(result, (strlen(result) + 1) * sizeof(char));
 
-    free(summandI);
-    free(summandII);
     return result;
 }
 
@@ -127,6 +125,53 @@ static char *write_additively(char *roman_numeral)
         result = replace_substring(result, Subtractive_Form[subtractive],
                                    Replacement_for_Subtractive[subtractive]);
         subtractive++;
+    }
+
+    return result;
+}
+
+/**
+ * get_key(symbol)
+ *
+ * Returns the (enum Roman_Numeral) corresponding to the character symbol if
+ * symbol appears in Roman_Numeral_Char and RN_LAST otherwise.
+ */
+static enum Roman_Numeral get_key(char symbol)
+{
+    enum Roman_Numeral result = RN_I;
+    while( ( (symbol != Roman_Numeral_Char[result++]) && (result < RN_LAST) ) );
+    return --result;
+}
+
+/**
+ * add_additive_roman_numerals(augend, addend, cat_length)
+ *
+ * Returns the sum of two additive Roman numerals, again represented in additive
+ * form.
+ */
+static char *add_additive_roman_numerals(char *augend, char *addend,
+                                         size_t cat_length)
+{
+    char *result = calloc(cat_length + 1, sizeof(char));
+
+    /* Count the number of occurrences of each symbol in the summands */
+    int symbol_counts[RN_LAST] = {0};
+    do {
+        symbol_counts[get_key(*augend++)]++;
+    } while (*augend != '\0');
+    do {
+        symbol_counts[get_key(*addend++)]++;
+    } while (*addend != '\0');
+
+    /*
+     * Insert the total number of each symbol appearing in augend and
+     * addend into result, beginning with M.
+     */
+    unsigned int offset = 0;
+    enum Roman_Numeral symbol = RN_LAST;
+    while (symbol-- > RN_I) {
+        memset(result + offset, Roman_Numeral_Char[symbol], symbol_counts[symbol]);
+        offset += symbol_counts[symbol];
     }
 
     return result;

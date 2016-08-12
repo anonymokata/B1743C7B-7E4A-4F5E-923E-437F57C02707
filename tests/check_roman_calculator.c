@@ -70,6 +70,12 @@ START_TEST(the_sums_of_AB_with_A_and_AA_are_B_and_BA_when_A_is_less_than_B)
 }
 END_TEST
 
+START_TEST(the_sum_of_VII_and_VIII_is_XV)
+{
+    ck_assert_str_eq(add_roman_numerals("VII", "VIII"), "XV");
+}
+END_TEST
+
 Suite *create_drmrd_roman_calculator_suite(void)
 {
     // Create our primary testing suite.
@@ -89,6 +95,7 @@ Suite *create_drmrd_roman_calculator_suite(void)
     tcase_add_test(tc_core, the_sum_of_III_and_II_is_V);
     tcase_add_test(tc_core, the_sum_of_IV_and_II_is_VI);
     tcase_add_test(tc_core, the_sums_of_AB_with_A_and_AA_are_B_and_BA_when_A_is_less_than_B);
+    tcase_add_test(tc_core, the_sum_of_VII_and_VIII_is_XV);
 
     // Add the core test case to test_suite
     suite_add_tcase(test_suite, tc_core);
