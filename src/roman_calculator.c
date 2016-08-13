@@ -166,6 +166,12 @@ char *subtract_roman_numerals(char *minuend, char *subtrahend)
         offset += tally[symbol];
     }
 
+    // Bundle smaller numerals into larger ones
+    result = bundle_roman_symbols(result);
+
+    // Substitute subtractive forms into result and finish
+    result = write_subtractively(result);
+
     return result;
 }
 
