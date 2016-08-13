@@ -76,6 +76,46 @@ START_TEST(the_sum_of_VII_and_VIII_is_XV)
 }
 END_TEST
 
+START_TEST(add_roman_numerals_correctly_converts_back_to_subtractive_forms)
+{
+    char *replacement[] = { "IIII",
+        "VIIII", "XXXXVIIII", "LXXXXVIIII", "CCCCLXXXXVIIII", "DCCCCLXXXXVIIII",
+            "V",     "XXXXV",     "LXXXXV",     "CCCCLXXXXV",     "DCCCCLXXXXV",
+                      "XXXX",      "LXXXX",      "CCCCLXXXX",      "DCCCCLXXXX",
+                                       "L",          "CCCCL",          "DCCCCL",
+                                                      "CCCC",           "DCCCC",
+                                                                            "D"
+    };
+    /*
+     * What the expected output should be if we just "reverse" the replacement
+     * rules used in write_additively (and run them in the same order). A fun
+     * little exercise is coming up with the pattern without cheating!
+     */
+    char *subtractive_forms[] = {
+        "IV", "IX", "XLIX", "XCIX", "CDXCIX", "CMXCIX",
+              "V",  "XLV",  "XCV",  "CDXCV",  "CMXCV",
+                    "XL",   "XC",   "CDXC",   "CMXC",
+                            "L",    "CDL",    "CML",
+                                    "CD",     "CM",
+                                              "D"
+    };
+    int number_of_subtractives = 21;
+
+    // A variable to store "M<rep>" for <rep> iterating through the
+    // replacement array.
+    char M_and_replacement[20] = {'M', '\0'};
+
+    int i = 0;
+    for (i = 0; i < number_of_subtractives; i++) {
+        strcat(M_and_replacement, subtractive_forms[i]);
+        ck_assert_str_eq(add_roman_numerals("M", replacement[i]),
+                         M_and_replacement);
+
+        memset(M_and_replacement + 1, '\0', 19);
+    }
+}
+END_TEST
+
 Suite *create_drmrd_roman_calculator_suite(void)
 {
     // Create our primary testing suite.
@@ -96,6 +136,7 @@ Suite *create_drmrd_roman_calculator_suite(void)
     tcase_add_test(tc_core, the_sum_of_IV_and_II_is_VI);
     tcase_add_test(tc_core, the_sums_of_AB_with_A_and_AA_are_B_and_BA_when_A_is_less_than_B);
     tcase_add_test(tc_core, the_sum_of_VII_and_VIII_is_XV);
+    tcase_add_test(tc_core, add_roman_numerals_correctly_converts_back_to_subtractive_forms);
 
     // Add the core test case to test_suite
     suite_add_tcase(test_suite, tc_core);

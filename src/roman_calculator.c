@@ -26,6 +26,7 @@ static enum Roman_Numeral get_key(char symbol);
 static char *add_additive_roman_numerals(char *augend, char *addend,
                                          size_t cat_length);
 static char *bundle_roman_symbols(char *numeral);
+static char *write_subtractively(char *roman_numeral);
 
 /**
  * add_roman_numerals(augend, addend)
@@ -57,7 +58,7 @@ char *add_roman_numerals(char *augend, char *addend)
     result = bundle_roman_symbols(result);
 
     // Resubstitute subtractive forms into result where they're needed.
-    result = replace_substring_and_realloc(result, "IIII", "IV");
+    result = write_subtractively(result);
 
     // Trim memory block after all replacements are completed.
     result = realloc(result, (strlen(result) + 1) * sizeof(char));
@@ -103,7 +104,7 @@ static char *write_additively(char *roman_numeral)
                                            SF_DM,
         SF_LAST
     };
-    char *Subtractive_Form[] = {
+    char *subtractive_form_string[] = {
         "IV", "IX", "IL", "IC", "ID", "IM",
               "VX", "VL", "VC", "VD", "VM",
                     "XL", "XC", "XD", "XM",
@@ -111,7 +112,7 @@ static char *write_additively(char *roman_numeral)
                                 "CD", "CM",
                                       "DM"
     };
-    char *Replacement_for_Subtractive[] = { "IIII",
+    char *subtractive_substitute_string[] = { "IIII",
         "VIIII", "XXXXVIIII", "LXXXXVIIII", "CCCCLXXXXVIIII", "DCCCCLXXXXVIIII",
             "V",     "XXXXV",     "LXXXXV",     "CCCCLXXXXV",     "DCCCCLXXXXV",
                       "XXXX",      "LXXXX",      "CCCCLXXXX",      "DCCCCLXXXX",
@@ -120,10 +121,10 @@ static char *write_additively(char *roman_numeral)
                                                                             "D"
     };
 
-    int subtractive = SF_IV;
+    size_t subtractive = SF_IV;
     while (subtractive < SF_LAST) {
-        result = replace_substring(result, Subtractive_Form[subtractive],
-                                   Replacement_for_Subtractive[subtractive]);
+        result = replace_substring(result, subtractive_form_string[subtractive],
+                                   subtractive_substitute_string[subtractive]);
         subtractive++;
     }
 
@@ -199,4 +200,65 @@ static char *bundle_roman_symbols(char *numeral) {
                                                 replacements[i]);
     }
     return numeral;
+}
+
+
+/**
+ * write_subtractively(roman_numeral)
+ *
+ * Beginning with a Roman numeral that is written in additive form, returns a
+ * shorter representation of the same numeral written with subtractive forms.
+ * The algorithm works assuming that roman_numeral has already had its symbols
+ * "rebundled" so that the maximum number of adjacent copies of any one of the
+ * same character CHAR appearing in roman_numeral is three for CHAR == 'I', 'X',
+ * or 'C' and one for CHAR == 'V', 'L', or 'D'.
+ *
+ * In the resulting output, the only character that may appear more than three
+ * times in a row is 'M'.
+ */
+static char *write_subtractively(char *roman_numeral)
+{
+    char *result = roman_numeral;
+    enum Subtractive_Form {
+        SF_IV, SF_IX, SF_IL, SF_IC, SF_ID, SF_IM,
+               SF_VX, SF_VL, SF_VC, SF_VD, SF_VM,
+                      SF_XL, SF_XC, SF_XD, SF_XM,
+                             SF_LC, SF_LD, SF_LM,
+                                    SF_CD, SF_CM,
+                                           SF_DM,
+        SF_LAST
+    };
+    char *subtractive_form_string[] = {
+        "IV", "IX", "IL", "IC", "ID", "IM",
+              "VX", "VL", "VC", "VD", "VM",
+                    "XL", "XC", "XD", "XM",
+                          "LC", "LD", "LM",
+                                "CD", "CM",
+                                      "DM"
+    };
+    char *subtractive_substitute_string[] = { "IIII",
+        "VIIII", "XXXXVIIII", "LXXXXVIIII", "CCCCLXXXXVIIII", "DCCCCLXXXXVIIII",
+            "V",     "XXXXV",     "LXXXXV",     "CCCCLXXXXV",     "DCCCCLXXXXV",
+                      "XXXX",      "LXXXX",      "CCCCLXXXX",      "DCCCCLXXXX",
+                                       "L",          "CCCCL",          "DCCCCL",
+                                                      "CCCC",           "DCCCC",
+                                                                            "D"
+    };
+
+    enum Subtractive_Form subtractive = SF_DM;
+    char *subtractive_str;
+    char *substitute_str;
+    while (subtractive-- > SF_IV) {
+        subtractive_str = subtractive_form_string[subtractive];
+        substitute_str = subtractive_substitute_string[subtractive];
+        //
+        if (!(strcmp(subtractive_str, "VX") == 0
+              || strcmp(subtractive_str, "LC") == 0
+              || strcmp(subtractive_str, "DM") == 0))
+        {
+            result = replace_substring_and_realloc(result, substitute_str, subtractive_str);
+        }
+    }
+
+    return result;
 }
