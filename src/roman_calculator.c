@@ -16,10 +16,40 @@
  * accountant.
  */
 #define MAX_NUMERAL_LENGTH 5000
+/**
+ * The output of the calculator when the inputs' combined size exceeds
+ * MAX_NUMERAL_LENGTH.
+ */
+#define INFINITAS "Infinitas"
 
 // I've done my best to avoid naming this Roman_Enumeral.
 enum Roman_Numeral {RN_I, RN_V, RN_X, RN_L, RN_C, RN_D, RN_M, RN_LAST};
 static const char Roman_Numeral_Char[] = {'I', 'V', 'X', 'L', 'C', 'D', 'M'};
+enum Subtractive_Form {
+    SF_IV, SF_IX, SF_IL, SF_IC, SF_ID, SF_IM,
+           SF_VX, SF_VL, SF_VC, SF_VD, SF_VM,
+                  SF_XL, SF_XC, SF_XD, SF_XM,
+                         SF_LC, SF_LD, SF_LM,
+                                SF_CD, SF_CM,
+                                       SF_DM,
+    SF_LAST
+};
+static char *subtractive_form_string[] = {
+    "IV", "IX", "IL", "IC", "ID", "IM",
+          "VX", "VL", "VC", "VD", "VM",
+                "XL", "XC", "XD", "XM",
+                      "LC", "LD", "LM",
+                            "CD", "CM",
+                                  "DM"
+};
+static char *subtractive_substitute_string[] = { "IIII",
+    "VIIII", "XXXXVIIII", "LXXXXVIIII", "CCCCLXXXXVIIII", "DCCCCLXXXXVIIII",
+        "V",     "XXXXV",     "LXXXXV",     "CCCCLXXXXV",     "DCCCCLXXXXV",
+                  "XXXX",      "LXXXX",      "CCCCLXXXX",      "DCCCCLXXXX",
+                                   "L",          "CCCCL",          "DCCCCL",
+                                                  "CCCC",           "DCCCC",
+                                                                        "D"
+};
 
 static char *write_additively(char *roman_numeral);
 static enum Roman_Numeral get_key(char symbol);
@@ -46,7 +76,7 @@ char *add_roman_numerals(char *augend, char *addend)
 
     if (cat_length > MAX_NUMERAL_LENGTH) {
         perror("Error: Combined size of inputs exceeds MAX_NUMERAL_LENGTH.");
-        return NULL;
+        return INFINITAS;
     }
 
     char *result = add_additive_roman_numerals(summandI, summandII, cat_length);
@@ -82,10 +112,11 @@ char *subtract_roman_numerals(void)//char *minuend, char *subtrahend)
     return NULL;
 }
 
+
+
 ///
 /// Helper Functions
 ///
-
 /**
  * write_additively(roman_numeral)
  *
@@ -95,31 +126,6 @@ char *subtract_roman_numerals(void)//char *minuend, char *subtrahend)
 static char *write_additively(char *roman_numeral)
 {
     char *result = roman_numeral;
-    enum Subtractive_Form {
-        SF_IV, SF_IX, SF_IL, SF_IC, SF_ID, SF_IM,
-               SF_VX, SF_VL, SF_VC, SF_VD, SF_VM,
-                      SF_XL, SF_XC, SF_XD, SF_XM,
-                             SF_LC, SF_LD, SF_LM,
-                                    SF_CD, SF_CM,
-                                           SF_DM,
-        SF_LAST
-    };
-    char *subtractive_form_string[] = {
-        "IV", "IX", "IL", "IC", "ID", "IM",
-              "VX", "VL", "VC", "VD", "VM",
-                    "XL", "XC", "XD", "XM",
-                          "LC", "LD", "LM",
-                                "CD", "CM",
-                                      "DM"
-    };
-    char *subtractive_substitute_string[] = { "IIII",
-        "VIIII", "XXXXVIIII", "LXXXXVIIII", "CCCCLXXXXVIIII", "DCCCCLXXXXVIIII",
-            "V",     "XXXXV",     "LXXXXV",     "CCCCLXXXXV",     "DCCCCLXXXXV",
-                      "XXXX",      "LXXXX",      "CCCCLXXXX",      "DCCCCLXXXX",
-                                       "L",          "CCCCL",          "DCCCCL",
-                                                      "CCCC",           "DCCCC",
-                                                                            "D"
-    };
 
     size_t subtractive = SF_IV;
     while (subtractive < SF_LAST) {
@@ -219,31 +225,6 @@ static char *bundle_roman_symbols(char *numeral) {
 static char *write_subtractively(char *roman_numeral)
 {
     char *result = roman_numeral;
-    enum Subtractive_Form {
-        SF_IV, SF_IX, SF_IL, SF_IC, SF_ID, SF_IM,
-               SF_VX, SF_VL, SF_VC, SF_VD, SF_VM,
-                      SF_XL, SF_XC, SF_XD, SF_XM,
-                             SF_LC, SF_LD, SF_LM,
-                                    SF_CD, SF_CM,
-                                           SF_DM,
-        SF_LAST
-    };
-    char *subtractive_form_string[] = {
-        "IV", "IX", "IL", "IC", "ID", "IM",
-              "VX", "VL", "VC", "VD", "VM",
-                    "XL", "XC", "XD", "XM",
-                          "LC", "LD", "LM",
-                                "CD", "CM",
-                                      "DM"
-    };
-    char *subtractive_substitute_string[] = { "IIII",
-        "VIIII", "XXXXVIIII", "LXXXXVIIII", "CCCCLXXXXVIIII", "DCCCCLXXXXVIIII",
-            "V",     "XXXXV",     "LXXXXV",     "CCCCLXXXXV",     "DCCCCLXXXXV",
-                      "XXXX",      "LXXXX",      "CCCCLXXXX",      "DCCCCLXXXX",
-                                       "L",          "CCCCL",          "DCCCCL",
-                                                      "CCCC",           "DCCCC",
-                                                                            "D"
-    };
 
     enum Subtractive_Form subtractive = SF_DM;
     char *subtractive_str;
