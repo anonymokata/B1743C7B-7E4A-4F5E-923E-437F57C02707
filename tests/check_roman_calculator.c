@@ -11,6 +11,9 @@
 #include <check.h>
 #include "../src/roman_calculator.h"
 
+/**
+ * Addition tests begin here
+ */
 START_TEST(add_roman_numerals_accepts_two_strings_consisting_of_symbols_IVXLCDM)
 {
     add_roman_numerals("IX", "VL");
@@ -116,17 +119,29 @@ START_TEST(add_roman_numerals_correctly_converts_back_to_subtractive_forms)
 }
 END_TEST
 
+/**
+ * Subtraction tests begin here
+ */
+START_TEST(II_minus_I_is_I)
+{
+    ck_assert_str_eq(subtract_roman_numerals("II", "I"), "I");
+}
+END_TEST
+
+
 Suite *create_drmrd_roman_calculator_suite(void)
 {
     // Create our primary testing suite.
     Suite *test_suite = suite_create("DRMRD_Roman_Calculator");
 
     /*
-     * Create and populate a test case for add_roman_numerals.
+     * Create and populate separate test cases for add_roman_numerals and
+     * subtract_roman_numerals.
      */
     TCase *tc_addition = tcase_create("Addition");
+    TCase *tc_subtraction = tcase_create("Subtraction");
 
-    // Populate our addition test case with our test functions.
+    // Populate our addition test case with test functions
     tcase_add_test(tc_addition, add_roman_numerals_accepts_two_strings_consisting_of_symbols_IVXLCDM);
     tcase_add_test(tc_addition, the_sum_of_I_and_I_is_II);
     tcase_add_test(tc_addition, the_sum_of_I_and_II_is_III);
@@ -136,8 +151,12 @@ Suite *create_drmrd_roman_calculator_suite(void)
     tcase_add_test(tc_addition, the_sum_of_VII_and_VIII_is_XV);
     tcase_add_test(tc_addition, add_roman_numerals_correctly_converts_back_to_subtractive_forms);
 
-    // Add the addition test case to test_suite
+    // Populate our subtraction test case with test functions
+    tcase_add_test(tc_subtraction, II_minus_I_is_I);
+
+    // Add our test cases to test_suite
     suite_add_tcase(test_suite, tc_addition);
+    suite_add_tcase(test_suite, tc_subtraction);
 
     return test_suite;
 }

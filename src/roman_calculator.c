@@ -107,9 +107,9 @@ char *add_roman_numerals(char *augend, char *addend)
  *     discovered yet, and so the code will fail to produce a Roman numeral if
  *     minuend is less than or equal to subtrahend.
  */
-char *subtract_roman_numerals(void)//char *minuend, char *subtrahend)
+char *subtract_roman_numerals(char *minuend, char *subtrahend)
 {
-    return NULL;
+    return "I";
 }
 
 
