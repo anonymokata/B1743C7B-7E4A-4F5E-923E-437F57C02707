@@ -109,7 +109,22 @@ char *add_roman_numerals(char *augend, char *addend)
  */
 char *subtract_roman_numerals(char *minuend, char *subtrahend)
 {
-    return "I";
+    /*
+     * Count up the number of I's in minuend and then subtract the number of I's
+     * in subtrahend.
+     */
+    int tally = 0;
+    for(; *minuend; tally++, minuend++);
+    for(; *subtrahend; tally--, subtrahend++);
+
+    /*
+     * Use the tally to memset the correct number of I's into a result
+     * variable.
+     */
+    char *result = calloc(tally + 1, sizeof(char));
+    memset(result, 'I', tally);
+
+    return result;
 }
 
 

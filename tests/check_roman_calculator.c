@@ -128,6 +128,12 @@ START_TEST(II_minus_I_is_I)
 }
 END_TEST
 
+START_TEST(III_minus_I_is_II)
+{
+    ck_assert_str_eq(subtract_roman_numerals("III", "I"), "II");
+}
+END_TEST
+
 
 Suite *create_drmrd_roman_calculator_suite(void)
 {
@@ -153,6 +159,7 @@ Suite *create_drmrd_roman_calculator_suite(void)
 
     // Populate our subtraction test case with test functions
     tcase_add_test(tc_subtraction, II_minus_I_is_I);
+    tcase_add_test(tc_subtraction, III_minus_I_is_II);
 
     // Add our test cases to test_suite
     suite_add_tcase(test_suite, tc_addition);
