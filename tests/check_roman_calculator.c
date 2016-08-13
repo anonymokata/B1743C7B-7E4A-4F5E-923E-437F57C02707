@@ -2,7 +2,7 @@
  * check_roman_calculator.c
  *
  *     Provides check-based unit tests for the drmrd_roman_calculator
- *     library. For simplicity we're using errno for error handling.
+ *     library. For  simplicity we're using errno for error handling.
  */
 
 #include <stdio.h>
@@ -101,8 +101,8 @@ START_TEST(add_roman_numerals_correctly_converts_back_to_subtractive_forms)
     };
     int number_of_subtractives = 21;
 
-    // A variable to store "M<rep>" for <rep> iterating through the
-    // replacement array.
+    // A variable to store "M<rep>" for <rep> iterating through the replacement
+    // array.
     char M_and_replacement[20] = {'M', '\0'};
 
     int i = 0;
