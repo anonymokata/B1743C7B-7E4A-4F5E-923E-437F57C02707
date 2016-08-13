@@ -51,6 +51,8 @@ static char *subtractive_substitute_string[] = { "IIII",
                                                                         "D"
 };
 
+int conversion_table[2][2] = {{1,0}, {5,1}};
+
 static char *write_additively(char *roman_numeral);
 static enum Roman_Numeral get_key(char symbol);
 static char *add_additive_roman_numerals(char *augend, char *addend,
@@ -113,16 +115,44 @@ char *subtract_roman_numerals(char *minuend, char *subtrahend)
      * Count up the number of I's in minuend and then subtract the number of I's
      * in subtrahend.
      */
-    int tally = 0;
-    for(; *minuend; tally++, minuend++);
-    for(; *subtrahend; tally--, subtrahend++);
+    int tally[RN_LAST] = {0};
+    int result_members = 1; // 1 to account for terminal '\0'
+    int exchange_rate;
+    enum Roman_Numeral symbol, symbolII; // Again for use while iterating below
+
+    // TODO: DRY these out
+    for(; *minuend; result_members++, tally[get_key(*minuend)]++, minuend++);
+    for(; *subtrahend; result_members--, tally[get_key(*subtrahend)]--, subtrahend++);
+
+    /*
+     * Borrow from larger neighbors when a tally member is negative
+     */
+    for(symbol = RN_I; symbol < RN_LAST; symbol++) {
+        if (tally[symbol] < 0) {
+            symbolII = symbol;
+            while(symbolII++, (tally[symbol] < 0 && !(symbolII < RN_I)))
+            {
+                exchange_rate = conversion_table[symbolII][symbol];
+                if (tally[symbolII] * exchange_rate > 0) {
+                    tally[symbolII]--;
+                    tally[symbol] += exchange_rate;
+                    result_members += exchange_rate - 1;
+                }
+            }
+        }
+    }
 
     /*
      * Use the tally to memset the correct number of I's into a result
      * variable.
      */
-    char *result = calloc(tally + 1, sizeof(char));
-    memset(result, 'I', tally);
+    char *result = calloc(result_members, sizeof(char));
+
+    size_t offset = 0;
+    for(symbol = RN_I; symbol < RN_LAST; symbol++) {
+        memset(result + offset, Roman_Numeral_Char[symbol], tally[symbol]);
+        offset += tally[symbol];
+    }
 
     return result;
 }
