@@ -124,9 +124,14 @@ char *add_roman_numerals(char *augend, char *addend)
 char *subtract_roman_numerals(char *minuend, char *subtrahend)
 {
     /*
-     * Count up the number of I's in minuend and then subtract the number of I's
-     * in subtrahend.
+     * Count up the number of each symbol in summandI and then subtract the
+     * number of appearances of that symbol in summandII.
      */
+    char *summandI = write_additively(minuend);
+    char *summandII = write_additively(subtrahend);
+    minuend = summandI;
+    subtrahend = summandII;
+
     int tally[RN_LAST] = {0};
     int result_members = 1; // 1 to account for terminal '\0'
     int exchange_rate;
@@ -135,6 +140,8 @@ char *subtract_roman_numerals(char *minuend, char *subtrahend)
     // TODO: DRY these out
     for(; *minuend; result_members++, tally[get_key(*minuend)]++, minuend++);
     for(; *subtrahend; result_members--, tally[get_key(*subtrahend)]--, subtrahend++);
+    free(summandI);
+    free(summandII);
 
     /*
      * Borrow from larger neighbors when a tally member is negative
@@ -160,10 +167,10 @@ char *subtract_roman_numerals(char *minuend, char *subtrahend)
      */
     char *result = calloc(result_members, sizeof(char));
 
-    size_t offset = 0;
+    size_t offset = result_members - 1;
     for(symbol = RN_I; symbol < RN_LAST; symbol++) {
+        offset -= tally[symbol];
         memset(result + offset, Roman_Numeral_Char[symbol], tally[symbol]);
-        offset += tally[symbol];
     }
 
     // Bundle smaller numerals into larger ones

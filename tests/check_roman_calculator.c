@@ -152,6 +152,12 @@ START_TEST(X_minus_I_is_IX)
 }
 END_TEST
 
+START_TEST(ID_minus_XLV_is_CDLIV)
+{
+    ck_assert_str_eq(subtract_roman_numerals("ID", "XLV"), "CDLIV");
+}
+END_TEST
+
 Suite *create_drmrd_roman_calculator_suite(void)
 {
     // Create our primary testing suite.
@@ -180,6 +186,7 @@ Suite *create_drmrd_roman_calculator_suite(void)
     tcase_add_test(tc_subtraction, V_minus_II_is_III);
     tcase_add_test(tc_subtraction, M_minus_D_is_D);
     tcase_add_test(tc_subtraction, X_minus_I_is_IX);
+    tcase_add_test(tc_subtraction, ID_minus_XLV_is_CDLIV);
 
     // Add our test cases to test_suite
     suite_add_tcase(test_suite, tc_addition);
