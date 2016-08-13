@@ -122,24 +122,22 @@ Suite *create_drmrd_roman_calculator_suite(void)
     Suite *test_suite = suite_create("DRMRD_Roman_Calculator");
 
     /*
-     * Create our "core" test case for use with test_suite. We will
-     * use this as our only test case unless, later, additional
-     * organization makes check's output more readable.
+     * Create and populate a test case for add_roman_numerals.
      */
-    TCase *tc_core = tcase_create("Core");
+    TCase *tc_addition = tcase_create("Addition");
 
-    // Populate our core test case with our test functions.
-    tcase_add_test(tc_core, add_roman_numerals_accepts_two_strings_consisting_of_symbols_IVXLCDM);
-    tcase_add_test(tc_core, the_sum_of_I_and_I_is_II);
-    tcase_add_test(tc_core, the_sum_of_I_and_II_is_III);
-    tcase_add_test(tc_core, the_sum_of_III_and_II_is_V);
-    tcase_add_test(tc_core, the_sum_of_IV_and_II_is_VI);
-    tcase_add_test(tc_core, the_sums_of_AB_with_A_and_AA_are_B_and_BA_when_A_is_less_than_B);
-    tcase_add_test(tc_core, the_sum_of_VII_and_VIII_is_XV);
-    tcase_add_test(tc_core, add_roman_numerals_correctly_converts_back_to_subtractive_forms);
+    // Populate our addition test case with our test functions.
+    tcase_add_test(tc_addition, add_roman_numerals_accepts_two_strings_consisting_of_symbols_IVXLCDM);
+    tcase_add_test(tc_addition, the_sum_of_I_and_I_is_II);
+    tcase_add_test(tc_addition, the_sum_of_I_and_II_is_III);
+    tcase_add_test(tc_addition, the_sum_of_III_and_II_is_V);
+    tcase_add_test(tc_addition, the_sum_of_IV_and_II_is_VI);
+    tcase_add_test(tc_addition, the_sums_of_AB_with_A_and_AA_are_B_and_BA_when_A_is_less_than_B);
+    tcase_add_test(tc_addition, the_sum_of_VII_and_VIII_is_XV);
+    tcase_add_test(tc_addition, add_roman_numerals_correctly_converts_back_to_subtractive_forms);
 
-    // Add the core test case to test_suite
-    suite_add_tcase(test_suite, tc_core);
+    // Add the addition test case to test_suite
+    suite_add_tcase(test_suite, tc_addition);
 
     return test_suite;
 }
@@ -147,8 +145,8 @@ Suite *create_drmrd_roman_calculator_suite(void)
 int main(void)
 {
     /*
-     * Setup a suite runner to go through our unit tests, recording
-     * their results.
+     * Setup a suite runner to go through our unit tests, recording their
+     * results.
      */
     int failure_count = 0;
     Suite *test_suite = create_drmrd_roman_calculator_suite();
@@ -156,8 +154,8 @@ int main(void)
     srunner_run_all(suite_runner, CK_NORMAL);
 
     /*
-     * check_roman_calculator will signal that it ran successfully if
-     * and only if all tests pass.
+     * check_roman_calculator will signal that it ran successfully if and only
+     * if all tests pass.
      */
     failure_count = srunner_ntests_failed(suite_runner);
     srunner_free(suite_runner);
