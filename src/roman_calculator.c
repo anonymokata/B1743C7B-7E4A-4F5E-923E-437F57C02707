@@ -51,7 +51,19 @@ static char *subtractive_substitute_string[] = { "IIII",
                                                                         "D"
 };
 
-int conversion_table[2][2] = {{1,0}, {5,1}};
+/*
+ * A table of conversion rates for use when borrowing from larger symbols during
+ * subtraction.
+ */
+int conversion_table[RN_LAST][RN_LAST] = {
+    {1, 0, 0, 0, 0, 0, 0},
+    {5, 1, 0, 0, 0, 0, 0},
+    {10, 2, 1, 0, 0, 0, 0},
+    {50, 10, 5, 1, 0, 0, 0},
+    {100, 20, 10, 2, 1, 0, 0},
+    {500, 100, 50, 10, 5, 1, 0},
+    {1000, 200, 100, 20, 10, 2, 1}
+};
 
 static char *write_additively(char *roman_numeral);
 static enum Roman_Numeral get_key(char symbol);
