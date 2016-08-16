@@ -2,7 +2,7 @@
  * check_roman_calculator.c
  *
  *     Provides check-based unit tests for the drmrd_roman_calculator
- *     library. For  simplicity we're using errno for error handling.
+ *     library. For simplicity we're using errno for error handling.
  */
 
 #include <stdio.h>
@@ -16,37 +16,49 @@
  */
 START_TEST(add_roman_numerals_accepts_two_strings_consisting_of_symbols_IVXLCDM)
 {
-    add_roman_numerals("IX", "VL");
-    add_roman_numerals("D", "CM");
+    char *resultI = add_roman_numerals("IX", "VL");
+    char *resultII = add_roman_numerals("D", "CM");
+    free(resultI);
+    free(resultII);
 }
 END_TEST
 
 START_TEST(the_sum_of_I_and_I_is_II)
 {
-    ck_assert_str_eq(add_roman_numerals("I", "I"), "II");
+    char *result = add_roman_numerals("I", "I");
+    ck_assert_str_eq(result, "II");
+    free(result);
 }
 END_TEST
 
 START_TEST(the_sum_of_I_and_II_is_III)
 {
-    ck_assert_str_eq(add_roman_numerals("I", "II"), "III");
+    char *result = add_roman_numerals("I", "II");
+    ck_assert_str_eq(result, "III");
+    free(result);
 }
 END_TEST
 
 START_TEST(the_sum_of_III_and_II_is_V)
 {
-    ck_assert_str_eq(add_roman_numerals("III", "II"), "V");
+    char *result = add_roman_numerals("III", "II");
+    ck_assert_str_eq(result, "V");
+    free(result);
 }
 END_TEST
 
 START_TEST(the_sum_of_IV_and_II_is_VI)
 {
-    ck_assert_str_eq(add_roman_numerals("IV", "II"), "VI");
+    char *result = add_roman_numerals("IV", "II");
+    ck_assert_str_eq(result, "VI");
+    free(result);
 }
 END_TEST
 
 START_TEST(the_sums_of_AB_with_A_and_AA_are_B_and_BA_when_A_is_less_than_B)
 {
+    char *resultI;
+    char *resultII;
     char *Subtractive_Form_AB_String[] = {
         "IV", "IX", "IL", "IC", "ID", "IM",
               "VX", "VL", "VC", "VD", "VM",
@@ -67,15 +79,21 @@ START_TEST(the_sums_of_AB_with_A_and_AA_are_B_and_BA_when_A_is_less_than_B)
         BA[1] = AB[0];
         BA[2] = '\0';
         B = AB + 1;
-        ck_assert_str_eq(add_roman_numerals(AB, A), B);
-        ck_assert_str_eq(add_roman_numerals(AB, AA), BA);
+        resultI = add_roman_numerals(AB, A);
+        resultII = add_roman_numerals(AB, AA);
+        ck_assert_str_eq(resultI, B);
+        ck_assert_str_eq(resultII, BA);
+        free(resultI);
+        free(resultII);
     }
 }
 END_TEST
 
 START_TEST(the_sum_of_VII_and_VIII_is_XV)
 {
-    ck_assert_str_eq(add_roman_numerals("VII", "VIII"), "XV");
+    char *result = add_roman_numerals("VII", "VIII");
+    ck_assert_str_eq(result, "XV");
+    free(result);
 }
 END_TEST
 
@@ -111,9 +129,10 @@ START_TEST(add_roman_numerals_correctly_converts_back_to_subtractive_forms)
     int i = 0;
     for (i = 0; i < number_of_subtractives; i++) {
         strcat(M_and_replacement, subtractive_forms[i]);
-        ck_assert_str_eq(add_roman_numerals("M", replacement[i]),
-                         M_and_replacement);
+        char *result = add_roman_numerals("M", replacement[i]);
+        ck_assert_str_eq(result, M_and_replacement);
 
+        free(result);
         memset(M_and_replacement + 1, '\0', 19);
     }
 }
@@ -124,37 +143,48 @@ END_TEST
  */
 START_TEST(II_minus_I_is_I)
 {
-    ck_assert_str_eq(subtract_roman_numerals("II", "I"), "I");
+    char *result = subtract_roman_numerals("II", "I");
+    ck_assert_str_eq(result, "I");
+    free(result);
 }
 END_TEST
 
 START_TEST(III_minus_I_is_II)
 {
-    ck_assert_str_eq(subtract_roman_numerals("III", "I"), "II");
+    char *result = subtract_roman_numerals("III", "I");
+    ck_assert_str_eq(result, "II");
+    free(result);
 }
 END_TEST
 
 START_TEST(V_minus_II_is_III)
 {
-    ck_assert_str_eq(subtract_roman_numerals("V", "II"), "III");
+    char *result = subtract_roman_numerals("V", "II");
+    ck_assert_str_eq(result, "III");
+    free(result);
 }
 END_TEST
 
 START_TEST(M_minus_D_is_D)
 {
-    ck_assert_str_eq(subtract_roman_numerals("M", "D"), "D");
+    char *result = subtract_roman_numerals("M", "D");
+    ck_assert_str_eq(result, "D");
+    free(result);
 }
 END_TEST
 
 START_TEST(X_minus_I_is_IX)
 {
-    ck_assert_str_eq(subtract_roman_numerals("X", "I"), "IX");
+    char *result = subtract_roman_numerals("X", "I");
+    ck_assert_str_eq(result, "IX");
+    free(result);
 }
 END_TEST
 
 START_TEST(ID_minus_XLV_is_CDLIV)
 {
-    ck_assert_str_eq(subtract_roman_numerals("ID", "XLV"), "CDLIV");
+    char *result = subtract_roman_numerals("ID", "XLV");
+    ck_assert_str_eq(result, "CDLIV");
 }
 END_TEST
 

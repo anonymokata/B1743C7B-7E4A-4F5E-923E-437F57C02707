@@ -1,13 +1,13 @@
 CFLAGS=-g -O2 -Wall -Wextra -Isrc -rdynamic -DNDEBUG $(OPTFLAGS)
 LIBS=-ldl $(OPTLIBS) # Library linking options
 PREFIX?=/usr/local
-LIBCHECK_STATIC=/usr/local/lib/libcheck.a
+CHECK_LIBRARY_DIR=/usr/local/lib
 
 SOURCES=$(wildcard src/**/*.c src/*.c)
 OBJECTS=$(patsubst src/%.c,build/%.o,$(SOURCES))
 
 TEST_SRC=$(wildcard tests/check_*.c)
-TESTS=$(patsubst %.c,%,$(TEST_SRC))
+TEST_OBJ=$(patsubst %.c,%,$(TEST_SRC))
 
 TARGET=build/libroman_calculator.a
 SO_TARGET=$(patsubst %.a,%.so,$(TARGET))
@@ -19,11 +19,11 @@ all: $(TARGET) $(SO_TARGET) check
 dev: CFLAGS=-g -Isrc -Wall -Wextra $(OPTFLAGS)
 dev: all
 
-# Recipe for object files
+# Recipe for Object Files
 $(OBJECTS): build/%.o: src/%.c
 	$(COMPILE.c) $(OUTPUT_OPTION) $<
 
-# Recipe for our main library
+# Recipe for libroman_calculator
 $(TARGET): CFLAGS += -fPIC
 $(TARGET): build $(OBJECTS)
 	ar rcs $@ $(OBJECTS)
@@ -31,34 +31,34 @@ $(TARGET): build $(OBJECTS)
 
 # Recipe for shared objects. Links each SO_TARGET to all objects.
 $(SO_TARGET): $(TARGET) $(OBJECTS)
-	@$(CC) -shared -o $@ $(OBJECTS)
+	$(CC) -shared -o $@ $(OBJECTS)
 
-# Create build and bin subdirectories for object/library files and
-# binaries.
+# Create build and bin subdirectories for object/library files and binaries.
 build:
 	@mkdir -p build
 	@mkdir -p bin
 
 # The Unit Tests
 tests/check_roman_calculator: $(TARGET)
-	@cc tests/check_roman_calculator.c \
+	cc tests/check_roman_calculator.c \
 	-o tests/check_roman_calculator build/libroman_calculator.a \
-	-L/usr/local/lib -lcheck -ldrmrd_string
+	-L$(CHECK_LIBRARY_DIR) -Wl,-rpath=$(CHECK_LIBRARY_DIR) -lcheck
 .PHONY: check
 check: tests/check_roman_calculator
 	./tests/check_roman_calculator
 
+# Valgrind
 valgrind:
 	VALGRIND="valgrind --log-file=/tmp/valgrind-%p.log" $(MAKE)
 
 # The Cleaner
 clean:
 	@rm -rf build $(OBJECTS) $(TESTS)
-	@rm -f tests/tests.log
+	@rm -f tests/tests.log tests/check_roman_calculator
 	@find . -name "*.gc*" -exec rm {} \;
 	@rm -rf `find . -name "*.dSYM" -print`
 
-# The Install
+# Library Installer
 install: all
 	install -d $(DESTDIR)/$(PREFIX)/lib/
 	install $(TARGET) $(DESTDIR)/$(PREFIX)/lib/

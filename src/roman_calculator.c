@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "drmrd_string.h" // For efficient string processing
 
 /**
  * One of a few arabic numbers that has slipped into this program to help add
@@ -16,6 +15,14 @@
  * accountant.
  */
 #define MAX_NUMERAL_LENGTH 5000
+/**
+ * The maximum amount that the size of a string will grow due to replacing a
+ * single instance of a subtractive form in the string with its additive
+ * equivalent. The number 13 is written explicitly here to avoid confusion, but
+ * note that an equivalent albeit obfuscated definition would be
+ * strlen("Roman Numeral"), which seems fitting.
+ */
+#define MAX_SUBST_SIZE_DIFF 13
 /**
  * The output of the calculator when the inputs' combined size exceeds
  * MAX_NUMERAL_LENGTH.
@@ -71,6 +78,11 @@ static char *add_additive_roman_numerals(char *augend, char *addend,
                                          size_t cat_length);
 static char *bundle_roman_symbols(char *numeral);
 static char *write_subtractively(char *roman_numeral);
+static char *replace_substrings(char *original, char *old_subs[],
+                                char *new_subs[], int start, int stop,
+                                char *ignored_substs[], size_t ignored_length);
+static char *replace_substring(char *original, char *old_sub, char *new_sub);
+static char *free_and_reassign(char **ptr_to_old_str, char **ptr_to_new_str);
 
 /**
  * add_roman_numerals(augend, addend)
@@ -93,19 +105,26 @@ char *add_roman_numerals(char *augend, char *addend)
         return INFINITAS;
     }
 
-    char *result = add_additive_roman_numerals(summandI, summandII, cat_length);
+    char *temp = add_additive_roman_numerals(summandI, summandII, cat_length);
     free(summandI);
     free(summandII);
 
+    char *result = calloc(strlen(temp) * MAX_SUBST_SIZE_DIFF + 1,
+                          sizeof(char));
+    result = strcpy(result, temp);
+    free(temp);
+
     // Process "carry overs", replacing groups of the same character with one
     // value-equivalent copy of the next most significant character.
-    result = bundle_roman_symbols(result);
+    temp = bundle_roman_symbols(result);
+    result = free_and_reassign(&result, &temp);
 
     // Resubstitute subtractive forms into result where they're needed.
-    result = write_subtractively(result);
+    temp = write_subtractively(result);
+    result = free_and_reassign(&result, &temp);
 
     // Trim memory block after all replacements are completed.
-    result = realloc(result, (strlen(result) + 1) * sizeof(char));
+    result = realloc(result, (strlen(temp) + 1) * sizeof(char));
 
     return result;
 }
@@ -166,6 +185,7 @@ char *subtract_roman_numerals(char *minuend, char *subtrahend)
      * variable.
      */
     char *result = calloc(result_members, sizeof(char));
+    char *temp;
 
     size_t offset = result_members - 1;
     for(symbol = RN_I; symbol < RN_LAST; symbol++) {
@@ -174,19 +194,26 @@ char *subtract_roman_numerals(char *minuend, char *subtrahend)
     }
 
     // Bundle smaller numerals into larger ones
-    result = bundle_roman_symbols(result);
+    temp = bundle_roman_symbols(result);
+    result = free_and_reassign(&result, &temp);
 
     // Substitute subtractive forms into result and finish
-    result = write_subtractively(result);
+    temp = write_subtractively(result);
+    result = free_and_reassign(&result, &temp);
 
     return result;
 }
 
+static char *free_and_reassign(char **ptr_to_old_str, char **ptr_to_new_str) {
+    free(*ptr_to_old_str);
+    return *ptr_to_new_str;
+}
 
 
 ///
 /// Helper Functions
 ///
+
 /**
  * write_additively(roman_numeral)
  *
@@ -195,14 +222,11 @@ char *subtract_roman_numerals(char *minuend, char *subtrahend)
  */
 static char *write_additively(char *roman_numeral)
 {
-    char *result = roman_numeral;
+    char *result = replace_substrings(roman_numeral, subtractive_form_string,
+                                      subtractive_substitute_string, SF_IV,
+                                      SF_LAST, NULL, 0);
+    result = realloc(result, (strlen(result) + 1) * sizeof(char));
 
-    size_t subtractive = SF_IV;
-    while (subtractive < SF_LAST) {
-        result = replace_substring(result, subtractive_form_string[subtractive],
-                                   subtractive_substitute_string[subtractive]);
-        subtractive++;
-    }
 
     return result;
 }
@@ -269,13 +293,10 @@ static char *bundle_roman_symbols(char *numeral) {
     char *bundles[] = {"IIIIIIIIII", "IIIII", "VV", "XXXXXXXXXX", "XXXXX", "LL",
                        "CCCCCCCCCC", "CCCCC", "DD"};
     char *replacements[] = {"X", "V", "X", "C", "L", "C", "M", "D", "M"};
-    size_t i;
-    for (i = 0; i < sizeof(bundles)/sizeof(char*); i++) {
-        numeral = replace_substring_and_realloc(numeral,
-                                                bundles[i],
-                                                replacements[i]);
-    }
-    return numeral;
+
+    char *result = replace_substrings(numeral, bundles, replacements,
+                                      0, sizeof(bundles)/sizeof(char*), NULL, 0);
+    return result;
 }
 
 
@@ -294,22 +315,105 @@ static char *bundle_roman_symbols(char *numeral) {
  */
 static char *write_subtractively(char *roman_numeral)
 {
-    char *result = roman_numeral;
+    char *evil_subtractives[] = {"VX", "LC", "DM"};
 
-    enum Subtractive_Form subtractive = SF_DM;
-    char *subtractive_str;
-    char *substitute_str;
-    while (subtractive-- > SF_IV) {
-        subtractive_str = subtractive_form_string[subtractive];
-        substitute_str = subtractive_substitute_string[subtractive];
-        //
-        if (!(strcmp(subtractive_str, "VX") == 0
-              || strcmp(subtractive_str, "LC") == 0
-              || strcmp(subtractive_str, "DM") == 0))
-        {
-            result = replace_substring_and_realloc(result, substitute_str, subtractive_str);
+    return replace_substrings(roman_numeral, subtractive_substitute_string,
+                              subtractive_form_string, SF_DM, SF_IV-1,
+                              evil_subtractives,
+                              sizeof(evil_subtractives)/sizeof(char *));
+}
+
+/**
+ * replace_substrings(original, old_subs, new_subs, start, stop,
+ *                    ignored_substs, ignored_length)
+ *
+ * Returns original with every instance of the i-th substring in old_subs
+ * replaced by the n-th substring in new_subs, unless the replacement substring
+ * appears in ignored_substs. The value of i is initially start. If start is
+ * less than stop (respectively, greater than stop), then i is incremented
+ * (resp., decremented)  and substitutions continue up to and including the
+ * (stop - 1)-th (resp., (stop + 1)-th) array entry.
+ */
+static char *replace_substrings(char *original, char *old_subs[],
+                                char *new_subs[], int start, int stop,
+                                char *ignored_substs[], size_t ignored_length)
+{
+    original = strdup(original);
+    char *old_sub;
+    char *new_sub;
+
+    int difference = stop - start;
+    /* Determine if i should move forward or backwards through the array. */
+    int direction = (difference == 0) ? 1 : (stop - start) / abs(stop - start);
+
+    char *temp;
+    int i;
+    size_t j;
+    for (i = start; i != stop; i += direction) {
+        j = 0;
+        old_sub = old_subs[i];
+        new_sub = new_subs[i];
+
+        for (j = 0; j < ignored_length; j++) {
+            if (strcmp(new_sub, ignored_substs[j]) == 0) {
+                break;
+            }
+        }
+        if (j == ignored_length) {
+            temp = replace_substring(original, old_sub, new_sub);
+            free(original);
+            original = temp;
         }
     }
 
-    return result;
+    return original;
+}
+
+
+/**
+ * replace_substring(original, old_sub, new_sub)
+ *
+ * Replaces all instances of old_sub in original with new_sub in linear
+ * time. Inevitably, this returns a copy of original, not the original
+ * (since there is no guarantee enough space exists in original for this).
+ */
+static char *replace_substring(char *original, char *old_sub, char *new_sub)
+{
+    /*
+     * Validate input, returning values in trivial cases. In
+     * particular, if original is NULL, we return NULL
+     * immediately. Likewise, if old_sub is trivial, then there's
+     * nothing to replace, and we may simply the original. We copy the
+     * original here instead of just returning it for the sake of
+     * consistency with later cases.
+     */
+    if (!original) return NULL;
+    if (!old_sub || strcmp(old_sub, "") == 0) return strdup(original);
+
+    if (!new_sub) new_sub = "";
+
+    original = strdup(original);
+    char *copy_of_original = strdup(original);
+    char *end_of_prev_match = copy_of_original;
+    char *next_match;
+    char *insertion_point = original;
+
+    int next_match_distance;
+    int old_sub_length = strlen(old_sub);
+    int new_sub_length = strlen(new_sub);
+
+    while ( ( next_match = strstr(end_of_prev_match, old_sub) ) )
+    {
+        next_match_distance = next_match - end_of_prev_match;
+        insertion_point = strncpy(insertion_point, end_of_prev_match,
+                                  next_match_distance) + next_match_distance;
+        insertion_point = strncpy(insertion_point, new_sub,
+                                  new_sub_length) + new_sub_length;
+        end_of_prev_match += next_match_distance + old_sub_length;
+    }
+    strcpy(insertion_point, end_of_prev_match);
+
+    free(copy_of_original);
+
+    return original;
 }
