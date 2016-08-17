@@ -1,4 +1,4 @@
-CFLAGS=-g -O2 -Wall -Wextra -Isrc -rdynamic -DNDEBUG $(OPTFLAGS)
+CFLAGS=-g -O2 -Wall -Wextra -std=c99 -Isrc -rdynamic -DNDEBUG $(OPTFLAGS)
 LIBS=-ldl $(OPTLIBS) # Library linking options
 PREFIX?=/usr/local
 CHECK_LIBRARY_DIR=/usr/local/lib
@@ -17,7 +17,7 @@ all: $(TARGET) $(SO_TARGET)
 
 # The Development Build
 dev: CFLAGS=-g -Isrc -Wall -Wextra $(OPTFLAGS)
-dev: all
+dev: all check
 
 # Recipe for Object Files
 $(OBJECTS): build/%.o: src/%.c

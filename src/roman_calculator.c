@@ -83,6 +83,7 @@ static char *replace_substrings(char *original, char *old_subs[],
                                 char *ignored_substs[], size_t ignored_length);
 static char *replace_substring(char *original, char *old_sub, char *new_sub);
 static char *free_and_reassign(char **ptr_to_old_str, char **ptr_to_new_str);
+static char *my_strdup (const char *string);
 
 /**
  * add_roman_numerals(augend, addend)
@@ -338,7 +339,7 @@ static char *replace_substrings(char *original, char *old_subs[],
                                 char *new_subs[], int start, int stop,
                                 char *ignored_substs[], size_t ignored_length)
 {
-    original = strdup(original);
+    original = my_strdup(original);
     char *old_sub;
     char *new_sub;
 
@@ -388,12 +389,12 @@ static char *replace_substring(char *original, char *old_sub, char *new_sub)
      * consistency with later cases.
      */
     if (!original) return NULL;
-    if (!old_sub || strcmp(old_sub, "") == 0) return strdup(original);
+    if (!old_sub || strcmp(old_sub, "") == 0) return my_strdup(original);
 
     if (!new_sub) new_sub = "";
 
-    original = strdup(original);
-    char *copy_of_original = strdup(original);
+    original = my_strdup(original);
+    char *copy_of_original = my_strdup(original);
     char *end_of_prev_match = copy_of_original;
     char *next_match;
     char *insertion_point = original;
@@ -416,4 +417,19 @@ static char *replace_substring(char *original, char *old_sub, char *new_sub)
     free(copy_of_original);
 
     return original;
+}
+
+/**
+ * my_strdup(string)
+ *
+ * Returns a mutable copy of its input on the heap (via malloc), or a null
+ * pointer if not enough memory is available for the duplication. This
+ * replicates the my_strdup function found in the POSIX C standard.
+ */
+static char *my_strdup (const char *original)
+{
+    char *result = malloc(strlen(original) + 1);
+    if (!result) return NULL;
+    strcpy(result, original);
+    return result;
 }
