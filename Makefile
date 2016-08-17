@@ -13,7 +13,7 @@ TARGET=build/libroman_calculator.a
 SO_TARGET=$(patsubst %.a,%.so,$(TARGET))
 
 # The Target Build
-all: $(TARGET) $(SO_TARGET) check
+all: $(TARGET) $(SO_TARGET)
 
 # The Development Build
 dev: CFLAGS=-g -Isrc -Wall -Wextra $(OPTFLAGS)
