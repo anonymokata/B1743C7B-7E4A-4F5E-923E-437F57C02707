@@ -1,3 +1,15 @@
+/**
+ * roman_calculator.c
+ *
+ * A library for computing the sum and difference of Roman numerals. See
+ * README.md for usage instructions and terminology.
+ *
+ * Author:
+ *     Daniel Moore
+ *
+ * Repository:
+ *     https://github.com/drmrd/roman-calculator
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -29,9 +41,26 @@
  */
 #define INFINITAS "Infinitas"
 
+/**
+ * To avoid writing down Arabic numerals (0, 1, 2, ...) explicitly in the
+ * program, I've instead decided to use enums when iterating. Roman_Numeral, for
+ * instance, will be used to iterate through the Roman numeral symbols at
+ * various points in the implementation. The "trick" I use repeatedly for
+ * mapping enums to characters/strings is simply creating a separate array for
+ * the latter with indices corresponding to appropriate enum members. For
+ * instance, to print the character 'V' using the next two structures, one can
+ * write roman_numeral_chars[RN_V]. This requires a small amount more memory to
+ * store a few arrays, but it's a simple way to obey the rules of the kata.
+ */
 // I've done my best to avoid naming this Roman_Enumeral.
 enum Roman_Numeral {RN_I, RN_V, RN_X, RN_L, RN_C, RN_D, RN_M, RN_LAST};
-static const char Roman_Numeral_Char[] = {'I', 'V', 'X', 'L', 'C', 'D', 'M'};
+static const char roman_numeral_chars[] = {'I', 'V', 'X', 'L', 'C', 'D', 'M'};
+
+/**
+ * The following enum and string arrays will be used to replace subtractive
+ * forms with their additive equivalents and vice versa, again without writing
+ * down any integers explicitly.
+ */
 enum Subtractive_Form {
     SF_IV, SF_IX, SF_IL, SF_IC, SF_ID, SF_IM,
            SF_VX, SF_VL, SF_VC, SF_VD, SF_VM,
@@ -98,7 +127,6 @@ char *add_roman_numerals(char *augend, char *addend)
     char *summandII = write_additively(addend);
 
     // Concatenate summands, throwing error if they are too large
-    // TODO: Might be better to return "Infinity" instead
     size_t cat_length = strlen(summandI) + strlen(summandII);
 
     if (cat_length > MAX_NUMERAL_LENGTH) {
@@ -191,7 +219,7 @@ char *subtract_roman_numerals(char *minuend, char *subtrahend)
     size_t offset = result_members - 1;
     for(symbol = RN_I; symbol < RN_LAST; symbol++) {
         offset -= tally[symbol];
-        memset(result + offset, Roman_Numeral_Char[symbol], tally[symbol]);
+        memset(result + offset, roman_numeral_chars[symbol], tally[symbol]);
     }
 
     // Bundle smaller numerals into larger ones
@@ -204,12 +232,6 @@ char *subtract_roman_numerals(char *minuend, char *subtrahend)
 
     return result;
 }
-
-static char *free_and_reassign(char **ptr_to_old_str, char **ptr_to_new_str) {
-    free(*ptr_to_old_str);
-    return *ptr_to_new_str;
-}
-
 
 ///
 /// Helper Functions
@@ -236,12 +258,12 @@ static char *write_additively(char *roman_numeral)
  * get_key(symbol)
  *
  * Returns the (enum Roman_Numeral) corresponding to the character symbol if
- * symbol appears in Roman_Numeral_Char and RN_LAST otherwise.
+ * symbol appears in roman_numeral_chars and RN_LAST otherwise.
  */
 static enum Roman_Numeral get_key(char symbol)
 {
     enum Roman_Numeral result = RN_I;
-    while( ( (symbol != Roman_Numeral_Char[result++]) && (result < RN_LAST) ) );
+    while( ( (symbol != roman_numeral_chars[result++]) && (result < RN_LAST) ) );
     return --result;
 }
 
@@ -272,7 +294,7 @@ static char *add_additive_roman_numerals(char *augend, char *addend,
     unsigned int offset = 0;
     enum Roman_Numeral symbol = RN_LAST;
     while (symbol-- > RN_I) {
-        memset(result + offset, Roman_Numeral_Char[symbol], symbol_counts[symbol]);
+        memset(result + offset, roman_numeral_chars[symbol], symbol_counts[symbol]);
         offset += symbol_counts[symbol];
     }
 
@@ -288,8 +310,6 @@ static char *add_additive_roman_numerals(char *augend, char *addend,
  * order of value beginning with 'I', which ensures we don't miss any bundling
  * opportunities for higher-value symbols.
  */
-// TODO: Consider writing a special substring replacement function
-//       here to speed this up and void memory leaks.
 static char *bundle_roman_symbols(char *numeral) {
     char *bundles[] = {"IIIIIIIIII", "IIIII", "VV", "XXXXXXXXXX", "XXXXX", "LL",
                        "CCCCCCCCCC", "CCCCC", "DD"};
@@ -347,6 +367,12 @@ static char *replace_substrings(char *original, char *old_subs[],
     /* Determine if i should move forward or backwards through the array. */
     int direction = (difference == 0) ? 1 : (stop - start) / abs(stop - start);
 
+    /*
+     * Move through original, beginning at the start location and ending at
+     * stop, replacing each substring matching something in new_subs with the
+     * corresponding element in old_subs (ignoring substitutions in
+     * ignored_substs).
+     */
     char *temp;
     int i;
     size_t j;
@@ -369,7 +395,6 @@ static char *replace_substrings(char *original, char *old_subs[],
 
     return original;
 }
-
 
 /**
  * replace_substring(original, old_sub, new_sub)
@@ -432,4 +457,15 @@ static char *my_strdup (const char *original)
     if (!result) return NULL;
     strcpy(result, original);
     return result;
+}
+
+/**
+ * free_and_reassign(ptr_to_old_str, ptr_to_new_str)
+ *
+ * Frees up memory pointed to by ptr_to_old_str and then points the latter to
+ * *ptr_to_new_str.
+ */
+static char *free_and_reassign(char **ptr_to_old_str, char **ptr_to_new_str) {
+    free(*ptr_to_old_str);
+    return *ptr_to_new_str;
 }

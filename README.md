@@ -11,6 +11,11 @@ where `A` and `B` are C-strings representing Roman numerals. The output of each
 function is a dynamically allocated string representing the sum/difference of
 the inputs as a Roman numeral.
 
+## Terminology
+Throughout the code I use standard terminology about Roman numerals, such as
+"subtractive" and "additive" representations of these numbers. All of the
+concepts are discussed on
+[Wikipedia](https://en.wikipedia.org/wiki/Roman_numerals#Roman_numeric_system).
 
 # Instructions/Make Targets
 All make commands should be executed in the project's root directory.
