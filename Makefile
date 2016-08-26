@@ -42,7 +42,7 @@ build:
 tests/check_roman_calculator: $(TARGET)
 	cc tests/check_roman_calculator.c \
 	-o tests/check_roman_calculator build/libroman_calculator.a \
-	-L$(CHECK_LIBRARY_DIR) -Wl,-rpath=$(CHECK_LIBRARY_DIR) -lcheck
+	-L$(CHECK_LIBRARY_DIR) -Wl,-rpath=$(CHECK_LIBRARY_DIR) $(shell pkg-config --libs --cflags check)
 .PHONY: check
 check: tests/check_roman_calculator
 	./tests/check_roman_calculator
